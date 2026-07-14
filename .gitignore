@@ -1,0 +1,25 @@
+# IDEs e Editores
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Compilação e Binários
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+publish/
+
+# Arquivos de Ambiente e Segredos Locais
+.env
+.env.local
+.env.*.local
+logs/
+
+# Caddy
+caddy_data/
+caddy_config/
+Caddyfile.backup

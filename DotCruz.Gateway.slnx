@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DotCruz.Gateway.Api/DotCruz.Gateway.Api.csproj" />
+  </Folder>
+</Solution>

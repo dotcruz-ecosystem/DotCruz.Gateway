@@ -1,0 +1,38 @@
+api.dotcruz.com {
+    # Compressão de respostas
+    encode gzip zstd
+
+    # Segurança: Cabeçalhos HTTP Recomendados (OWASP & DevOps Best Practices)
+    header {
+        # Previne o navegador de adivinhar o Content-Type (MIME-sniffing)
+        X-Content-Type-Options "nosniff"
+
+        # Protege contra clickjacking (não permite renderizar em frames/iframes)
+        X-Frame-Options "DENY"
+
+        # Controla quais informações de origem são enviadas no cabeçalho Referer
+        Referrer-Policy "strict-origin-when-cross-origin"
+
+        # HSTS (Strict-Transport-Security): força conexões HTTPS por 1 ano
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+        # Previne injeções de script bloqueando páginas se XSS for detectado (navegadores legados)
+        X-XSS-Protection "1; mode=block"
+
+        # Remove o cabeçalho Server do Caddy para evitar vazamento de versão da infraestrutura
+        -Server
+    }
+
+    # Encaminha o tráfego para a API do Gateway
+    reverse_proxy gateway-api:8080
+
+    # Configuração de Auditoria e Logs de Acesso
+    log {
+        output file /var/log/caddy/access.log {
+            roll_size 10mb      # Rotaciona quando atingir 10MB
+            roll_keep 10        # Mantém até 10 arquivos de log antigos
+            roll_keep_for 2160h # Mantém logs por 90 dias (2160 horas)
+        }
+        format json
+    }
+}

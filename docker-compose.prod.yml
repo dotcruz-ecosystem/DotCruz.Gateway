@@ -1,0 +1,54 @@
+services:
+  gateway-api:
+    image: ${DOCKER_IMAGE_TAG}
+    container_name: dotcruz-gateway-api
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - Settings__ServiceAuth__Self__Name=Gateway
+      - Settings__ServiceAuth__Self__Key=${GATEWAY_SERVICE_KEY}
+      - Settings__Jwt__Issuer=${JWT_ISSUER}
+      - Settings__Jwt__Audience=${JWT_AUDIENCE}
+      - Settings__Jwt__JwksUrl=${JWT_JWKS_URL}
+    networks:
+      - dotcruz_net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: dotcruz-edge-caddy
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      - ./logs/caddy:/var/log/caddy
+    networks:
+      - dotcruz_net
+    depends_on:
+      - gateway-api
+
+networks:
+  dotcruz_net:
+    name: dotcruz_net
+    external: true
+
+volumes:
+  caddy_data:
+  caddy_config:
+
