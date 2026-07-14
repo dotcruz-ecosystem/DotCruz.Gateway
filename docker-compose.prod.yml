@@ -37,7 +37,7 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
-      - ./logs/caddy:/var/log/caddy
+      - caddy_logs:/var/log/caddy
     networks:
       - dotcruz_net
     depends_on:
@@ -51,4 +51,5 @@ networks:
 volumes:
   caddy_data:
   caddy_config:
+  caddy_logs:
 
