@@ -74,8 +74,10 @@ jobs:
             
             mv -f docker-compose.prod.yml docker-compose.yml 2>/dev/null || true
             
+            # Garante que o diretório de logs do Caddy exista e tenha permissões adequadas
             mkdir -p logs/caddy
             chmod 755 logs/caddy
+            chown -R 1000:1000 logs/caddy 2>/dev/null || true
             
             # Cria/Sobrescreve o arquivo .env injetando a tag da imagem e os secrets
             cat <<EOF > .env
