@@ -1,4 +1,9 @@
 <Solution>
+  <Folder Name="/Itens de Solução/">
+    <File Path=".github/workflows/deploy.yml" />
+    <File Path=".github/workflows/gitleaks.yml" />
+    <File Path="docker-compose.prod.yml" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/DotCruz.Gateway.Api/DotCruz.Gateway.Api.csproj" />
   </Folder>

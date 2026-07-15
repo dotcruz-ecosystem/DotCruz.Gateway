@@ -1,4 +1,4 @@
-﻿namespace DotCruz.Gateway.Api.Configurations.Cors;
+namespace DotCruz.Gateway.Api.Configurations.Cors;
 
 public static class CorsConfiguration
 {
@@ -12,7 +12,8 @@ public static class CorsConfiguration
             {
                 policy.WithOrigins(allowedOrigins)
                           .AllowAnyHeader()
-                          .AllowAnyMethod();
+                          .AllowAnyMethod()
+                          .AllowCredentials();
             });
         });
 
