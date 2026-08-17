@@ -14,7 +14,7 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.17.0" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.17.0" />
     <PackageReference Include="Yarp.ReverseProxy" Version="2.3.0" />
-    <PackageReference Include="DotCruz.Shared.Security" Version="1.0.5" />
+    <PackageReference Include="DotCruz.Shared.Security" Version="1.0.7" />
   </ItemGroup>
 
 </Project>
