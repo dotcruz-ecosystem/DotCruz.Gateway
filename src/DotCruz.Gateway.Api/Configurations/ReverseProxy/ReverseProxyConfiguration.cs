@@ -20,6 +20,28 @@ public static class ReverseProxyConfiguration
 
                 builderContext.AddRequestTransform(transformContext =>
                 {
+                    var path = transformContext.HttpContext.Request.Path.Value;
+
+                    if (path?.EndsWith("/auth/refresh-token", StringComparison.OrdinalIgnoreCase) == true
+                        && transformContext.HttpContext.Request.Cookies.TryGetValue("refresh_token", out var refreshToken)
+                        && !string.IsNullOrEmpty(refreshToken))
+                    {
+                        var payload = JsonSerializer.Serialize(new Dictionary<string, string>
+                        {
+                            ["refresh_token"] = refreshToken
+                        });
+
+                        transformContext.ProxyRequest.Content = new StringContent(
+                            payload,
+                            System.Text.Encoding.UTF8,
+                            "application/json");
+                    }
+
+                    return ValueTask.CompletedTask;
+                });
+
+                builderContext.AddRequestTransform(transformContext =>
+                {
                     var user = transformContext.HttpContext.User;
                     var tenantIdClaim = user.FindFirst("tenant_id")?.Value
                                         ?? user.FindFirst("TenantId")?.Value;
