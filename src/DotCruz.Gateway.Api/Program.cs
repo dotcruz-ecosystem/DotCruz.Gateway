@@ -1,4 +1,5 @@
 using DotCruz.Gateway.Api.Configurations.Cors;
+using DotCruz.Gateway.Api.Configurations.ForwardedHeaders;
 using DotCruz.Gateway.Api.Configurations.RateLimits;
 using DotCruz.Gateway.Api.Configurations.Resilience;
 using DotCruz.Gateway.Api.Configurations.ReverseProxy;
@@ -11,11 +12,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSharedSecurity(builder.Configuration);
 builder.Services.AddGatewayReverseProxy(builder.Configuration);
 builder.Services.AddGatewayCorsConfiguration(builder.Configuration);
-builder.Services.AddGatewayRateLimiter();
+builder.Services.AddGatewayForwardedHeaders(builder.Configuration);
+builder.Services.AddGatewayRateLimiter(builder.Configuration);
 builder.Services.AddGatewayTracing(builder.Environment);
 builder.Services.AddGatewayResilience();
 
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 app.UseRouting();
 app.UseCors();
