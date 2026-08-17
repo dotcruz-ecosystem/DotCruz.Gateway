@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 using Yarp.ReverseProxy.Transforms;
 
@@ -7,6 +8,8 @@ public static class ReverseProxyConfiguration
 {
     public static IServiceCollection AddGatewayReverseProxy(this IServiceCollection services, IConfiguration configuration)
     {
+        services.Configure<AuthCookieSettings>(configuration.GetSection("Settings:AuthCookies"));
+
         services.AddReverseProxy()
             .LoadFromConfig(configuration.GetSection("ReverseProxy"))
             .AddTransforms(builderContext =>
@@ -51,6 +54,9 @@ public static class ReverseProxyConfiguration
                                 responseContent.Headers.ContentType?.MediaType ?? "application/json"
                             );
 
+                            var cookieSettings = httpContext.RequestServices
+                                .GetRequiredService<IOptions<AuthCookieSettings>>().Value;
+
                             try
                             {
                                 using var jsonDoc = JsonDocument.Parse(responseBody);
@@ -87,7 +93,7 @@ public static class ReverseProxyConfiguration
                                         Secure = true,
                                         SameSite = SameSiteMode.Lax,
                                         Path = "/",
-                                        Expires = DateTimeOffset.UtcNow.AddDays(1)
+                                        Expires = DateTimeOffset.UtcNow.AddMinutes(cookieSettings.AccessTokenLifetimeMinutes)
                                     });
                                 }
 
@@ -96,14 +102,20 @@ public static class ReverseProxyConfiguration
                                     httpContext.Response.Cookies.Append("refresh_token", newRefreshToken, new CookieOptions
                                     {
                                         HttpOnly = true,
-                                        Secure = false,
+                                        Secure = true,
                                         SameSite = SameSiteMode.Lax,
                                         Path = "/",
-                                        Expires = DateTimeOffset.UtcNow.AddDays(7)
+                                        Expires = DateTimeOffset.UtcNow.AddDays(cookieSettings.RefreshTokenLifetimeDays)
                                     });
                                 }
                             }
-                            catch { }
+                            catch (JsonException exception)
+                            {
+                                httpContext.RequestServices
+                                    .GetRequiredService<ILoggerFactory>()
+                                    .CreateLogger("Gateway.AuthCookies")
+                                    .LogError(exception, "Falha ao interpretar a resposta de {Path} para gravar os cookies de sessao.", requestPath);
+                            }
                         }
                     }
                 });
