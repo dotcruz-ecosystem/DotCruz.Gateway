@@ -4,8 +4,10 @@ namespace DotCruz.Gateway.Api.Configurations.RateLimits;
 
 public static class RateLimiterConfiguration
 {
-    public static IServiceCollection AddGatewayRateLimiter(this IServiceCollection services)
+    public static IServiceCollection AddGatewayRateLimiter(this IServiceCollection services, IConfiguration configuration)
     {
+        services.Configure<RateLimitSettings>(configuration.GetSection("Settings:RateLimits"));
+
         services.AddRateLimiter(options =>
         {
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
