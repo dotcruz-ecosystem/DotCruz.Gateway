@@ -20,28 +20,6 @@ public static class ReverseProxyConfiguration
 
                 builderContext.AddRequestTransform(transformContext =>
                 {
-                    var path = transformContext.HttpContext.Request.Path.Value;
-
-                    if (path?.EndsWith("/auth/refresh-token", StringComparison.OrdinalIgnoreCase) == true
-                        && transformContext.HttpContext.Request.Cookies.TryGetValue("refresh_token", out var refreshToken)
-                        && !string.IsNullOrEmpty(refreshToken))
-                    {
-                        var payload = JsonSerializer.Serialize(new Dictionary<string, string>
-                        {
-                            ["refresh_token"] = refreshToken
-                        });
-
-                        transformContext.ProxyRequest.Content = new StringContent(
-                            payload,
-                            System.Text.Encoding.UTF8,
-                            "application/json");
-                    }
-
-                    return ValueTask.CompletedTask;
-                });
-
-                builderContext.AddRequestTransform(transformContext =>
-                {
                     var user = transformContext.HttpContext.User;
                     var tenantIdClaim = user.FindFirst("tenant_id")?.Value
                                         ?? user.FindFirst("TenantId")?.Value;
@@ -107,12 +85,15 @@ public static class ReverseProxyConfiguration
                                     newRefreshToken = GetStringProperty(root, "refreshToken", "refresh_token", "RefreshToken");
                                 }
 
+                                var isHttps = httpContext.Request.IsHttps || 
+                                              string.Equals(httpContext.Request.Headers["X-Forwarded-Proto"], "https", StringComparison.OrdinalIgnoreCase);
+
                                 if (!string.IsNullOrEmpty(newAccessToken))
                                 {
                                     httpContext.Response.Cookies.Append("access_token", newAccessToken, new CookieOptions
                                     {
                                         HttpOnly = true,
-                                        Secure = true,
+                                        Secure = isHttps,
                                         SameSite = SameSiteMode.Lax,
                                         Path = "/",
                                         Expires = DateTimeOffset.UtcNow.AddMinutes(cookieSettings.AccessTokenLifetimeMinutes)
@@ -124,7 +105,7 @@ public static class ReverseProxyConfiguration
                                     httpContext.Response.Cookies.Append("refresh_token", newRefreshToken, new CookieOptions
                                     {
                                         HttpOnly = true,
-                                        Secure = true,
+                                        Secure = isHttps,
                                         SameSite = SameSiteMode.Lax,
                                         Path = "/",
                                         Expires = DateTimeOffset.UtcNow.AddDays(cookieSettings.RefreshTokenLifetimeDays)

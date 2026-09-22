@@ -36,3 +36,8 @@ api.dotcruz.com {
         format json
     }
 }
+
+http://localhost {
+    reverse_proxy gateway-api:8080
+}
+
