@@ -1,3 +1,4 @@
+using DotCruz.Shared.Security.CustomClaim;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 using Yarp.ReverseProxy.Transforms;
@@ -16,18 +17,18 @@ public static class ReverseProxyConfiguration
             {
                 builderContext.AddRequestHeaderRemove("X-Api-Key");
                 builderContext.AddRequestHeaderRemove("X-Service-Name");
-                builderContext.AddRequestHeaderRemove("X-Tenant-ID");
+                builderContext.AddRequestHeaderRemove("X-Workspace-ID");
 
                 builderContext.AddRequestTransform(transformContext =>
                 {
                     var user = transformContext.HttpContext.User;
-                    var tenantIdClaim = user.FindFirst("tenant_id")?.Value
-                                        ?? user.FindFirst("TenantId")?.Value;
+                    var workspaceIdClaim = user.FindFirst(CustomClaimsTypes.WorkspaceId)?.Value
+                                           ?? user.FindFirst("workspace_id")?.Value;
 
-                    if (!string.IsNullOrEmpty(tenantIdClaim))
+                    if (!string.IsNullOrEmpty(workspaceIdClaim))
                     {
-                        transformContext.ProxyRequest.Headers.Remove("X-Tenant-ID");
-                        transformContext.ProxyRequest.Headers.Add("X-Tenant-ID", tenantIdClaim);
+                        transformContext.ProxyRequest.Headers.Remove("X-Workspace-ID");
+                        transformContext.ProxyRequest.Headers.Add("X-Workspace-ID", workspaceIdClaim);
                     }
 
                     return ValueTask.CompletedTask;
