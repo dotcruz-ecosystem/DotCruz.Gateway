@@ -40,7 +40,7 @@ public static class ReverseProxyConfiguration
                     var requestPath = httpContext.Request.Path.Value;
 
                     var isAuthRoute = requestPath != null && 
-                                      (requestPath.EndsWith("/auth/login") || requestPath.EndsWith("/auth/refresh-token"));
+                                      (requestPath.EndsWith("/auth/login") || requestPath.EndsWith("/auth/refresh-token") || requestPath.EndsWith("/auth/activate"));
 
                     if (isAuthRoute && transformContext.ProxyResponse != null && transformContext.ProxyResponse.StatusCode == System.Net.HttpStatusCode.OK)
                     {
